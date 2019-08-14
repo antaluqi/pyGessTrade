@@ -62,6 +62,11 @@ def getCrtFilePublickey(file_path):
     return pubkey
 
 
+def getPfxFilePrivatekey(file_path,pw):
+    cert=OpenSSL.crypto.load_pkcs12(open(file_path, 'rb').read(),pw)
+    return OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, cert.get_privatekey())
+
+
 '''
 rsa加密
 '''
@@ -70,4 +75,10 @@ def rsaEncrypt(bitInfo,pubKey):
     return rsa.encrypt(bitInfo, publicKey)
 
 
+'''
+rsa解密
+'''
+def rsaDecrypt(bitInfo,pvtKey):
 
+    privateKey=rsa.PrivateKey.load_pkcs1_openssl_pem(pvtKey)
+    return rsa.encrypt(bitInfo, privateKey)

@@ -1,6 +1,6 @@
 import Req,Comm
 from config import *
-
+import socket
 
 class API():
     def __init__(self):
@@ -28,3 +28,22 @@ class API():
         v_reqMag.user_type='2'
         # 数据头+数据体
         sMsg=GReqHead.ToString()+v_reqMag.ToString()
+
+        publicKey=Comm.getCrtFilePublickey("./cert/server.crt")
+        buffer=''.encode('utf-8')
+        for i in range(0,len(sMsg),100):
+            buffer=buffer+Comm.rsaEncrypt(sMsg[i:i+100].encode('utf-8'),publicKey)
+        buffer_Len_Str=Comm.Fill(str(len(buffer)),'0',8,'L')
+        client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        client.connect(('119.145.36.50',20443))
+        client.send(buffer_Len_Str.encode('utf-8'))
+        client.send(buffer)
+        buffer4 = client.recv(8)
+        buffer5=client.recv(int(buffer4.decode('utf-8')))
+        client.close()
+        privateKey=Comm.getPfxFilePrivatekey("./cert/client.pfx",'123456')
+        streamArr=''.encode('utf-8')
+        for i in range(0,len(buffer5),128):
+            buffer6=buffer5[i:i+127]
+            streamArr=streamArr+Comm.rsaDecrypt(buffer6,privateKey)
+        print(streamArr)
