@@ -2,7 +2,7 @@ import hashlib
 import OpenSSL
 import rsa
 from dateutil import parser
-
+import pyDes
 '''
 字符串填充
 str：原字符串
@@ -62,3 +62,19 @@ rsa解密
 def rsaDecrypt(bitInfo,pvtKey):
     privateKey=rsa.PrivateKey.load_pkcs1(pvtKey,'DER')
     return rsa.decrypt(bitInfo, privateKey)
+
+'''
+3DSE加密
+学习网址：https://www.cnblogs.com/chjbbs/p/5407232.html
+'''
+def triple_des_encrypt(key,iv,value):
+    k = pyDes.triple_des(key, pyDes.CBC, IV=iv, pad=None, padmode=pyDes.PAD_PKCS5)
+    return k.encrypt(value)
+
+'''
+3DSE解密
+学习网址：https://www.cnblogs.com/chjbbs/p/5407232.html
+'''
+def triple_des_decrypt(key,iv,value):
+    k = pyDes.triple_des(key, pyDes.CBC, IV=iv, pad=None, padmode=pyDes.PAD_PKCS5)
+    return k.decrypt(value)
