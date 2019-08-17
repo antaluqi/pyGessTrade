@@ -132,7 +132,7 @@ class API():
         self.SendGoldMsg(client,v_sMsg)
         for i in range(44):
             QuoteInfo_str=self.RecvGoldMsg(client)
-            #print(QuoteInfo_str)
+            print(QuoteInfo_str)
         client.close()
     '''
     发送函数
@@ -245,11 +245,13 @@ class API():
             str1=arrLfvMsg[iOffset: iOffset + num2 - 2]
             iOffset = iOffset + num2 - 2
             #strR=strR+'#'+str(idx)+'='+str1.decode('gbk')
-            strR = strR + '#' + FieldName[idx] + '=' + str1.decode('gbk')
+            strR = strR + '#' + FieldName[idx]
+            value=str1.decode('gbk')
             #====================================
             if FieldName[idx]=='sZipBuff':
-                self.unzipQuote(str1.decode('gbk'))
+                value=self.unzipQuote(value)
             #====================================
+            strR=strR+'='+value
         return strR
 
     '''
@@ -261,8 +263,11 @@ class API():
             num += (arrLfvMsg[i] & 0xff) << (8 * ((iLen - 1) - (i - iOffset)))
         return num
 
-
+    '''
+    报价字符串解码
+    '''
     def unzipQuote(self,sZipBuff):
+        strR='^'
         mNeedZipFields=['lastSettle', 'lastClose', 'open', 'high', 'low', 'last', 'close', 'settle', 'bid1', 'bidLot1', 'bid2', 'bidLot2', 'bid3', 'bidLot3', 'bid4', 'bidLot4',
             'bid5', 'bidLot5', 'ask1', 'askLot1', 'ask2', 'askLot2', 'ask3', 'askLot3', 'ask4', 'askLot4', 'ask5', 'askLot5', 'volume', 'weight', 'highLimit', 'lowLimit',
             'Posi', 'upDown', 'turnOver', 'average', 'sequenceNo', 'quoteTime', 'upDownRate']
@@ -280,11 +285,14 @@ class API():
             bytes=buffer[i+1:i+num4+1]
             i=i+num4+1
             name=mNeedZipFields[index]
+            '''
             value = 0
             L = len(bytes)
             for ii in range(L):
                 value=value+bytes[ii]<<(8*(L-ii-1))
-            value=value/1000
+            '''
+            value=self.toLongByBytes(bytes)/1000
+            #value=value/1000
             if name=='quoteTime':
                 value=Comm.Fill(str(int(value*1000)),'0',6,'L')
                 if len(value)==6:
@@ -292,8 +300,23 @@ class API():
             if name=='upDownRate':
                 value=value/10000
 
-            print(name)
-            print(value)
+            strR=strR+name+'='+str(value)+'^'
+        return strR
+
+    '''
+    bytes转long
+    '''
+    def toLongByBytes(self,bytes):
+        strR=''
+        for i in range(len(bytes)):
+            str2=format(bytes[i], '#010b')[2:]
+            if len(str2)>8:
+                str2=str2[end-8:]
+            strR=strR+str2
+        if strR[0]=='1':
+            return int('0b0'+strR[1:],2)*(-1)
+        return int('0b'+strR,2)
+
 
 
 

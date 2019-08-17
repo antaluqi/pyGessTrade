@@ -6,9 +6,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/pyGessTrade.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pyGessTrade.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GressTrade.py" beforeDir="false" afterPath="$PROJECT_DIR$/GressTrade.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Trans.py" beforeDir="false" afterPath="$PROJECT_DIR$/Trans.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -30,17 +27,21 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/GressTrade.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="369">
-              <caret line="285" column="49" selection-start-line="285" selection-start-column="49" selection-end-line="285" selection-end-column="49" />
+            <state relative-caret-position="105">
+              <caret line="130" column="34" lean-forward="true" selection-start-line="130" selection-start-column="34" selection-end-line="130" selection-end-column="34" />
               <folding>
-                <element signature="e#0#17#0" expanded="true" />
-                <element signature="e#4464#4597#0" />
-                <element signature="e#4224#4764#0" />
-                <element signature="e#4844#5283#0" />
-                <element signature="e#5380#5969#0" />
-                <element signature="e#6177#6645#0" />
-                <element signature="e#6846#7077#0" />
-                <element signature="e#7779#7938#0" />
+                <element signature="e#373#2360#0" />
+                <element signature="e#2426#3511#0" />
+                <element signature="e#4628#4761#0" />
+                <element signature="e#4830#5377#0" />
+                <element signature="e#5457#5896#0" />
+                <element signature="e#5993#6582#0" />
+                <element signature="e#6656#6700#0" />
+                <element signature="e#6788#7256#0" />
+                <element signature="e#7330#7376#0" />
+                <element signature="e#7458#7689#0" />
+                <element signature="e#8583#8739#0" />
+                <element signature="e#10301#10573#0" />
               </folding>
             </state>
           </provider>
@@ -49,8 +50,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Trans.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="136" column="24" lean-forward="true" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
+            <state relative-caret-position="912">
+              <caret line="136" column="24" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
                 <element signature="e#354#678#0" />
@@ -62,8 +63,6 @@
                 <element signature="e#2622#2767#0" />
                 <element signature="e#2845#3105#0" />
                 <element signature="e#3189#3530#0" />
-                <element signature="e#4006#7259#0" />
-                <element signature="e#7313#11074#0" />
               </folding>
             </state>
           </provider>
@@ -72,8 +71,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="19">
-              <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+            <state relative-caret-position="361">
+              <caret line="19" selection-start-line="19" selection-end-line="19" />
             </state>
           </provider>
         </entry>
@@ -81,7 +80,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Comm.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1232">
+            <state relative-caret-position="1235">
               <caret line="75" column="50" selection-start-line="75" selection-start-column="50" selection-end-line="75" selection-end-column="50" />
               <folding>
                 <element signature="e#179#342#0" />
@@ -119,9 +118,9 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="-17" />
-    <option name="y" value="20" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="31" />
+    <option name="y" value="-5" />
     <option name="width" value="1300" />
     <option name="height" value="1004" />
   </component>
@@ -131,6 +130,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -142,7 +142,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -213,23 +212,24 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-17" y="20" width="1300" height="1004" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16164818" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10748156" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info id="DB Browser" order="3" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.42873564" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.4284165" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39770114" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3292232" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.3256351" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.30694142" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.36258662" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.36008677" />
       <window_info anchor="bottom" id="DB Execution Console" order="11" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -239,20 +239,17 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/GTApi.py" />
     <entry file="file://$PROJECT_DIR$/Req.py" />
-    <entry file="file://$PROJECT_DIR$/Comm.py">
+    <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1232">
-          <caret line="75" column="50" selection-start-line="75" selection-start-column="50" selection-end-line="75" selection-end-column="50" />
-          <folding>
-            <element signature="e#179#342#0" />
-          </folding>
+        <state relative-caret-position="95">
+          <caret line="5" selection-start-line="5" selection-end-line="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Trans.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="136" column="24" lean-forward="true" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
+        <state relative-caret-position="912">
+          <caret line="136" column="24" selection-start-line="136" selection-start-column="24" selection-end-line="136" selection-end-column="24" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
             <element signature="e#354#678#0" />
@@ -264,39 +261,44 @@
             <element signature="e#2622#2767#0" />
             <element signature="e#2845#3105#0" />
             <element signature="e#3189#3530#0" />
-            <element signature="e#4006#7259#0" />
-            <element signature="e#7313#11074#0" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/config.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
-          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+        <state relative-caret-position="361">
+          <caret line="19" selection-start-line="19" selection-end-line="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Comm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1235">
+          <caret line="75" column="50" selection-start-line="75" selection-start-column="50" selection-end-line="75" selection-end-column="50" />
+          <folding>
+            <element signature="e#179#342#0" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/GressTrade.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="369">
-          <caret line="285" column="49" selection-start-line="285" selection-start-column="49" selection-end-line="285" selection-end-column="49" />
+        <state relative-caret-position="105">
+          <caret line="130" column="34" lean-forward="true" selection-start-line="130" selection-start-column="34" selection-end-line="130" selection-end-column="34" />
           <folding>
-            <element signature="e#0#17#0" expanded="true" />
-            <element signature="e#4464#4597#0" />
-            <element signature="e#4224#4764#0" />
-            <element signature="e#4844#5283#0" />
-            <element signature="e#5380#5969#0" />
-            <element signature="e#6177#6645#0" />
-            <element signature="e#6846#7077#0" />
-            <element signature="e#7779#7938#0" />
+            <element signature="e#373#2360#0" />
+            <element signature="e#2426#3511#0" />
+            <element signature="e#4628#4761#0" />
+            <element signature="e#4830#5377#0" />
+            <element signature="e#5457#5896#0" />
+            <element signature="e#5993#6582#0" />
+            <element signature="e#6656#6700#0" />
+            <element signature="e#6788#7256#0" />
+            <element signature="e#7330#7376#0" />
+            <element signature="e#7458#7689#0" />
+            <element signature="e#8583#8739#0" />
+            <element signature="e#10301#10573#0" />
           </folding>
         </state>
       </provider>
