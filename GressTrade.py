@@ -2,6 +2,8 @@ import Trans,Comm
 from config import *
 import socket,re,gzip
 import pprint
+import datetime
+import base64
 
 class API():
     '''
@@ -10,7 +12,8 @@ class API():
     def __init__(self):
         self.serverInfo=Trans.ServerInfo()
         self.custInfo=Trans.CustomerInfo()
-
+        self.user_id=''
+        self._user_pwd=''
     '''
     登陆
     '''
@@ -38,6 +41,8 @@ class API():
         # 数据头+数据体
         v_sMsg=GReqHead.ToString()+v_reqMag.ToString()
 
+        self.user_id = v_reqMag.user_id
+        self._user_pwd=v_reqMag.user_pwd
         publicKey=Comm.getCrtFilePublickey("./cert/server.crt")
         buffer=''.encode('utf-8')
         for i in range(0,len(v_sMsg),100):
@@ -108,17 +113,27 @@ class API():
         v_reqMag.RspCode = ''
         v_reqMag.RspMsg = ''
         v_reqMag.again_flag = '0'
-        v_reqMag.branch_id = obj.ServerInfo.branch_id
+        v_reqMag.branch_id = self.serverInfo.branch_id
         v_reqMag.cust_type_id = 'C01'
         v_reqMag.is_lfv = '1'
-        v_reqMag.lan_ip = obj.login_ip
+        v_reqMag.lan_ip = Constant['login_ip']
         v_reqMag.term_type = ''
-        v_reqMag.user_id = obj.user_id
-        v_reqMag.user_key = datestr(now, 'HHMMSSFFF')
-        v_reqMag.user_pwd = obj.user_pwd
-        v_reqMag.user_type = obj.user_type
+        v_reqMag.user_id = self.user_id
+        v_reqMag.user_key = datetime.datetime.now().strftime('%H%M%S%f')[0:-3]
+        v_reqMag.user_pwd = self._user_pwd
+        v_reqMag.user_type = Constant['user_type']
         v_reqMag.www_ip = ''
 
+        v_sMsg=v_reqMag.ToString()
+        ip = self.serverInfo.broadcast_ip
+        port = self.serverInfo.broadcast_port
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((ip, port))
+        self.SendGoldMsg(client,v_sMsg)
+        for i in range(44):
+            QuoteInfo_str=self.RecvGoldMsg(client)
+            #print(QuoteInfo_str)
+        client.close()
     '''
     发送函数
     '''
@@ -135,8 +150,7 @@ class API():
         vReadBytes=self.RecvByLen(client,num)
         arrLfvMsg=self.TripleDes_decryptMsg(self.unzipReadBytes(vReadBytes))
         if len(arrLfvMsg) > 8 and arrLfvMsg[0] == 35 and arrLfvMsg[1] == 76 and arrLfvMsg[2] == 102 and arrLfvMsg[3] == 118 and arrLfvMsg[4] == 77 and arrLfvMsg[5] == 115 and arrLfvMsg[6] == 103 and arrLfvMsg[7] == 61:
-            client.close()
-            raise 'GlobalLfvTransfer_lfvToKv 函数'
+            str = self.GlobalLfvTransfer_lfvToKv(arrLfvMsg, 8, len(arrLfvMsg) - 2)
         else:
             str=arrLfvMsg.decode('gbk')
         return str
@@ -175,13 +189,11 @@ class API():
         destinationArray=Comm.Fill(str(destinationArray_len-8),'0',8,'L').encode('utf-8')+bytes([iEncryptMode])+Comm.Fill(self.serverInfo.session_id,'0',10,'R').encode('utf-8')+sourceArray
         return destinationArray
 
-
     '''
     3DS加密实现
     '''
     def encrypt(self,key,iv,value):
         return Comm.triple_des_encrypt(key,iv,value)
-
 
     '''
     3DS解密
@@ -210,7 +222,7 @@ class API():
     '''
     解压缩数据gzip
     '''
-    def unzipReadBytes(obj, vReadBytes):
+    def unzipReadBytes(self, vReadBytes):
         if len(vReadBytes) > 1 and vReadBytes[0] == 1:
             bytes = vReadBytes[1:];
             buffer2=gzip.decompress(bytes)
@@ -219,8 +231,69 @@ class API():
             arrLfvMsg=vReadBytes
         return arrLfvMsg
 
+    '''
+    报价数据分解
+    '''
+    def GlobalLfvTransfer_lfvToKv(self,arrLfvMsg,iStartIndex,iEndIndex):
+        strR=''
+        iOffset = iStartIndex
+        while iOffset <= iEndIndex:
+            num2=self.byteToInt(arrLfvMsg, iOffset,2)
+            iOffset = iOffset + 2;
+            idx=self.byteToInt(arrLfvMsg, iOffset,2)
+            iOffset = iOffset + 2;
+            str1=arrLfvMsg[iOffset: iOffset + num2 - 2]
+            iOffset = iOffset + num2 - 2
+            #strR=strR+'#'+str(idx)+'='+str1.decode('gbk')
+            strR = strR + '#' + FieldName[idx] + '=' + str1.decode('gbk')
+            #====================================
+            if FieldName[idx]=='sZipBuff':
+                self.unzipQuote(str1.decode('gbk'))
+            #====================================
+        return strR
+
+    '''
+    byte数据转int
+    '''
+    def byteToInt(self,arrLfvMsg,iOffset,iLen):
+        num = 0;
+        for i in range(iOffset,iOffset + iLen,1):
+            num += (arrLfvMsg[i] & 0xff) << (8 * ((iLen - 1) - (i - iOffset)))
+        return num
 
 
+    def unzipQuote(self,sZipBuff):
+        mNeedZipFields=['lastSettle', 'lastClose', 'open', 'high', 'low', 'last', 'close', 'settle', 'bid1', 'bidLot1', 'bid2', 'bidLot2', 'bid3', 'bidLot3', 'bid4', 'bidLot4',
+            'bid5', 'bidLot5', 'ask1', 'askLot1', 'ask2', 'askLot2', 'ask3', 'askLot3', 'ask4', 'askLot4', 'ask5', 'askLot5', 'volume', 'weight', 'highLimit', 'lowLimit',
+            'Posi', 'upDown', 'turnOver', 'average', 'sequenceNo', 'quoteTime', 'upDownRate']
+        buffer=base64.b64decode(sZipBuff)
+        i = 0;
+        while i < len(buffer):
+            num2 = buffer[i]
+            strbin=Comm.Fill(bin(num2)[2:],'0',8,'L')
+            if len(strbin)>8:
+                strbin=strbin[-8:]
+            index=int('0b'+strbin[0:6],2)
+            num4=3+int('0b'+strbin[6:],2);
+            if i>=len(buffer)-1:
+                break
+            bytes=buffer[i+1:i+num4+1]
+            i=i+num4+1
+            name=mNeedZipFields[index]
+            value = 0
+            L = len(bytes)
+            for ii in range(L):
+                value=value+bytes[ii]<<(8*(L-ii-1))
+            value=value/1000
+            if name=='quoteTime':
+                value=Comm.Fill(str(int(value*1000)),'0',6,'L')
+                if len(value)==6:
+                    value=value[0:2]+':'+value[2:4]+':'+value[4:]
+            if name=='upDownRate':
+                value=value/10000
+
+            print(name)
+            print(value)
 
 
 
