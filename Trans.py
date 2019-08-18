@@ -146,6 +146,17 @@ class ReqT6002(ReqBase):
         self.paginal_num = 0
         self.query_id = ""
 
+        self.prod_code=""
+        self.exch_code=""
+        self.b_offset_flag=""
+
+    def ToString(self):
+        fields=vars(self)
+        strR='#'
+        for k,v in fields.items():
+                strR=strR+k+'='+str(v)+'#'
+        return strR
+
 '''
 获取报价的发送消息类
 '''

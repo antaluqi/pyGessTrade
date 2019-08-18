@@ -200,15 +200,19 @@ class API():
         v_reqMag.login_teller_id=self.serverInfo.user_id
         v_reqMag.oper_flag='1'
         v_reqMag.paginal_num='500'
+        v_reqMag.query_id='AcctEntrFlow'
 
         v_sMsg = GReqHead.ToString() + v_reqMag.ToString()
+        print(v_sMsg)
+        # 'cb8e8527160021032 1021805322    B00151853                       #alm_view_field=exch_date∧order_no∧market_id∧prod_code∧exch_code∧entr_price∧entr_amount∧remain_amount∧offset_flag∧entr_stat∧e_term_type∧e_exch_time∧c_term_type∧c_exch_time∧rsp_msg∧local_order_no∧#curr_page=1#login_branch_id=B00151853#login_teller_id=1021805322#oper_flag=1#paginal_num=500#query_id=AcctEntrFlow#prod_code=#exch_code=#b_offset_flag=#'
         ip=self.serverInfo.query_ip
         port=self.serverInfo.query_port
+
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((ip, port))
         self.SendGoldMsg(client,v_sMsg)
         tradeInfo_str=self.RecvGoldMsg(client)
-        print(trade_str)
+        print(tradeInfo_str)
         client.close()
 
 
@@ -242,7 +246,10 @@ class API():
     发送函数
     '''
     def SendGoldMsg(self,client,v_sMsg):
-        v_sMsg=Comm.Fill(str(len(v_sMsg)),'0',8,'L')+v_sMsg
+        #v_sMsg=Comm.Fill(str(len(v_sMsg)),'0',8,'L')+v_sMsg
+        v_sMsg=Comm.Fill(str(len(v_sMsg.encode('utf-8'))),'0',8,'L')+v_sMsg
+        v_sMsg=v_sMsg.encode('utf-8')
+
         buffer = self.TripleDes_encryptMsg(2, v_sMsg)
         client.send(buffer)
 
