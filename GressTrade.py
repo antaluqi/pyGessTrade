@@ -134,6 +134,110 @@ class API():
             QuoteInfo_str=self.RecvGoldMsg(client)
             print(QuoteInfo_str)
         client.close()
+
+
+    '''
+    交易函数
+    '''
+    def trade(self):
+        # 数据头
+        GReqHead = Trans.ReqHead()
+        GReqHead.branch_id=self.serverInfo.branch_id
+        GReqHead.exch_code='4041'
+        GReqHead.msg_flag='1'
+        GReqHead.msg_type='1'
+        GReqHead.term_type='03'
+        GReqHead.user_id=self.serverInfo.user_id
+        GReqHead.user_type='2'
+        # 数据体
+        v_reqMag = Trans.ReqT4041()
+        v_reqMag.acct_no=self.serverInfo.user_id
+        v_reqMag.b_market_id = '02'
+        v_reqMag.bank_no = ''
+        v_reqMag.bs = 'b'               # 交易方向
+        v_reqMag.client_serial_no = self.serverInfo.user_id+str((datetime.datetime.now().hour*3600+datetime.datetime.now().minute*60+datetime.datetime.now().second)*10) # '1021805322584010'
+        v_reqMag.cov_type = ''
+        v_reqMag.cust_id = self.serverInfo.user_id
+        v_reqMag.deli_flag = ''
+        v_reqMag.entr_amount = '1'      # 交易数量
+        v_reqMag.entr_price = '3904.00' # 交易价格
+        v_reqMag.match_type = '1'
+        v_reqMag.offset_flag = '0'
+        v_reqMag.oper_flag = '1'
+        v_reqMag.order_send_type = '1'
+        v_reqMag.prod_code = 'Ag(T+D)' # 交易品种
+        v_reqMag.src_match_no = ''
+
+        v_sMsg = GReqHead.ToString() + v_reqMag.ToString()
+        ip=self.serverInfo.trans_ip
+        port=self.serverInfo.trans_port
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((ip, port))
+        self.SendGoldMsg(client,v_sMsg)
+        trade_str=self.RecvGoldMsg(client)
+        print(trade_str)
+        client.close()
+
+
+    '''
+    交易信息查询
+    '''
+    def getTradeInfo(self):
+        # 数据头
+        GReqHead = Trans.ReqHead()
+        GReqHead.branch_id=self.serverInfo.branch_id
+        GReqHead.exch_code='6002'
+        GReqHead.msg_flag='1'
+        GReqHead.msg_type='1'
+        GReqHead.term_type='03'
+        GReqHead.user_id=self.serverInfo.user_id
+        GReqHead.user_type='2'
+        # 数据体
+        v_reqMag=Trans.ReqT6002()
+        v_reqMag.alm_view_field="exch_date∧order_no∧market_id∧prod_code∧exch_code∧entr_price∧entr_amount∧remain_amount∧offset_flag∧entr_stat∧e_term_type∧e_exch_time∧c_term_type∧c_exch_time∧rsp_msg∧local_order_no∧"
+        v_reqMag.curr_page='1'
+        v_reqMag.login_branch_id=self.serverInfo.branch_id
+        v_reqMag.login_teller_id=self.serverInfo.user_id
+        v_reqMag.oper_flag='1'
+        v_reqMag.paginal_num='500'
+
+        v_sMsg = GReqHead.ToString() + v_reqMag.ToString()
+        ip=self.serverInfo.query_ip
+        port=self.serverInfo.query_port
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((ip, port))
+        self.SendGoldMsg(client,v_sMsg)
+        tradeInfo_str=self.RecvGoldMsg(client)
+        print(trade_str)
+        client.close()
+
+
+    def Close(self):
+        # 数据头
+        GReqHead = Trans.ReqHead()
+        GReqHead.branch_id = self.serverInfo.branch_id
+        GReqHead.exch_code = '8002'
+        GReqHead.msg_flag = '1'
+        GReqHead.msg_type = '1'
+        GReqHead.term_type = '03'
+        GReqHead.user_id = self.serverInfo.user_id
+        GReqHead.user_type = '2'
+        # 数据体
+        v_reqMag=Trans.ReqT8002()
+        v_reqMag.oper_flag='1'
+        v_reqMag.user_id=self.serverInfo.user_id
+        v_reqMag.user_type='2'
+
+        v_sMsg = GReqHead.ToString() + v_reqMag.ToString()
+        ip = self.serverInfo.trans_ip
+        port = self.serverInfo.trans_port
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((ip, port))
+        self.SendGoldMsg(client, v_sMsg)
+        close_str = self.RecvGoldMsg(client)
+        print(close_str)
+        client.close()
+        # fb9e673180022032 1021805322    B00151853   00000000#rsp_msg=处理成功#oper_flag=1#
     '''
     发送函数
     '''
@@ -202,7 +306,7 @@ class API():
         ENCRYPT_MODEL_LEN = 1
         SESSION_LEN = 10;
         IV_DEFAULT = '12345678';
-        num = bDecryptMsgBuff[ENCRYPT_MODEL_LEN];
+        num = bDecryptMsgBuff[ENCRYPT_MODEL_LEN-1];
         if num==1:
             pass
         elif num==2:
@@ -210,7 +314,7 @@ class API():
             vStartIndex = ENCRYPT_MODEL_LEN + SESSION_LEN
             buffer = bDecryptMsgBuff[vStartIndex:]
             vSrcBuff = self.decrypt(key, IV_DEFAULT, buffer)
-            return vSrcBuff[9:end]
+            return vSrcBuff[9:]
         return bDecryptMsgBuff
 
     '''

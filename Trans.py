@@ -45,16 +45,17 @@ class ReqHead():
 
 
 '''
-消息基础类
+发送消息基础类
 '''
 class ReqBase(object):
 
     def ToString(self):
         fields=vars(self)
-        str='#'
+        strR='#'
         for k,v in fields.items():
-            str=str+k+'='+v+'#'
-        return str
+            if v!='':
+               strR=strR+k+'='+str(v)+'#'
+        return strR
 
 
 '''
@@ -73,6 +74,19 @@ class ReqT8006(ReqBase):
         self.user_type = ''
 
 
+'''
+关闭发送的消息类
+'''
+
+class ReqT8002(ReqBase):
+    def __init__(self):
+        self.oper_flag='0'
+        self.user_id=""
+        self.user_type=""
+
+'''
+交易的发送消息类
+'''
 class ReqP4001(ReqBase):
     def __init__(self):
         self.acct_no = ""
@@ -105,6 +119,7 @@ class ReqT4041(ReqP4001):
 获取客户信息的发送类
 '''
 class ReqT1020(ReqBase):
+
     def __init__(self):
         self.acct_no = ""
         self.is_check_stat = "1"
@@ -116,6 +131,20 @@ class ReqT1020(ReqBase):
         self.qry_storage = "0"
         self.qry_surplus = "0"
 
+
+'''
+交易信息查询的发送类
+'''
+class ReqT6002(ReqBase):
+    def __init__(self):
+        # public ArrayListMsg alm_view_field = new ArrayListMsg();
+        self.alm_view_field=""
+        self.curr_page = 1
+        self.login_branch_id = ""
+        self.login_teller_id = ""
+        self.oper_flag = 1
+        self.paginal_num = 0
+        self.query_id = ""
 
 '''
 获取报价的发送消息类
@@ -147,6 +176,9 @@ class GBcMsgReqLink(ReqBase):
 # =====================================================================================================================
 # Rsp
 # =====================================================================================================================
+'''
+返回消息基础类
+'''
 class RspBase(object):
 
     def ToString(self):
@@ -154,8 +186,6 @@ class RspBase(object):
         for k,v in vars(self).items():
             reStr=reStr+str(k)+'='+str(v)+'\n'
         return reStr
-
-
 
 '''
 服务器返回登陆信息的储存类
@@ -323,3 +353,69 @@ class CustomerInfo(RspBase):
             self.f_avaliable_offset_quota = float(CustInfoMap['f_avaliable_offset_quota'] )
             self.f_used_offset_quota = float(CustInfoMap['f_used_offset_quota'] )
             self.f_offset_entr_margin = float(CustInfoMap['f_offset_entr_margin'] )
+
+class QuoteItem(RspBase):
+    def __init__(self):
+        self.ApiName=''
+        self.instID=''
+        self.quoteDate=''
+        self.upDownRate = 0
+        self.quoteTime = ''
+        self.sequenceNo = 0
+        self.average = 0
+        self.turnOver = 0
+        self.upDown = 0
+        self.Posi = 0
+        self.lowLimit = 0
+        self.highLimit = 0
+        self.weight = 0
+        self.volume = 0
+        self.askLot5 = 0
+        self.ask5 = 0
+        self.askLot4 = 0
+        self.ask4 = 0
+        self.askLot3 = 0
+        self.ask3 = 0
+        self.askLot2 = 0
+        self.ask2 = 0
+        self.askLot1 = 0
+        self.ask1 = 0
+        self.bidLot5 = 0
+        self.bid5 = 0
+        self.bidLot4 = 0
+        self.bid4 = 0
+        self.bidLot3 = 0
+        self.bid3 = 0
+        self.bidLot2 = 0
+        self.bid2 = 0
+        self.bidLot1 = 0
+        self.bid1 = 0
+        self.settle = 0
+        self.close = 0
+        self.last = 0
+        self.low = 0
+        self.high = 0
+        self.open = 0
+        self.lastClose = 0
+        self.lastSettle = 0
+
+class Quote(object):
+    def __init__(self):
+        self.au9999 = QuoteItem()
+        self.au100g = QuoteItem()
+        self.iau9999 = QuoteItem()
+        self.au50g = QuoteItem()
+        self.iau100 = QuoteItem()
+        self.au9995 = QuoteItem()
+        self.autn2 = QuoteItem()
+        self.agtd = QuoteItem()
+        self.autn1 = QuoteItem()
+        self.autd = QuoteItem()
+        self.ag9999 = QuoteItem()
+        self.au995 = QuoteItem()
+        self.ag999 = QuoteItem()
+        self.pgc30g = QuoteItem()
+        self.iau995 = QuoteItem()
+        self.pt9995 = QuoteItem()
+        self.mautd = QuoteItem()
+
