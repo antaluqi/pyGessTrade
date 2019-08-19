@@ -247,8 +247,8 @@ class API():
     '''
     def SendGoldMsg(self,client,v_sMsg):
         #v_sMsg=Comm.Fill(str(len(v_sMsg)),'0',8,'L')+v_sMsg
-        v_sMsg=Comm.Fill(str(len(v_sMsg.encode('utf-8'))),'0',8,'L')+v_sMsg
-        v_sMsg=v_sMsg.encode('utf-8')
+        v_sMsg=Comm.Fill(str(len(v_sMsg.encode('gbk'))),'0',8,'L')+v_sMsg
+        v_sMsg=v_sMsg.encode('gbk')
 
         buffer = self.TripleDes_encryptMsg(2, v_sMsg)
         client.send(buffer)
