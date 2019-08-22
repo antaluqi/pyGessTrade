@@ -14,6 +14,7 @@ class API():
         self.custInfo=Trans.CustomerInfo()
         self.user_id=''
         self._user_pwd=''
+        self.quote=Trans.Quote()
     '''
     登陆
     '''
@@ -131,8 +132,8 @@ class API():
         client.connect((ip, port))
         self.SendGoldMsg(client,v_sMsg)
         for i in range(44):
-            QuoteInfo_str=self.RecvGoldMsg(client)
-            print(QuoteInfo_str)
+            QuoteInfo_Dict=self.RecvGoldMsg(client)
+            self.quote.fromDict(QuoteInfo_Dict)
         client.close()
 
 
@@ -239,8 +240,14 @@ class API():
         client.connect((ip, port))
         self.SendGoldMsg(client, v_sMsg)
         close_str = self.RecvGoldMsg(client)
-        print(close_str)
         client.close()
+        closeR=re.findall(r'rsp_msg=(.*?)#', close_str, re.M | re.I)[0]
+        if closeR=='处理成功':
+            print('关闭成功')
+            return True
+        print('关闭失败：'+closeR)
+        return False
+
         # fb9e673180022032 1021805322    B00151853   00000000#rsp_msg=处理成功#oper_flag=1#
     '''
     发送函数
@@ -346,7 +353,7 @@ class API():
     报价数据分解
     '''
     def GlobalLfvTransfer_lfvToKv(self,arrLfvMsg,iStartIndex,iEndIndex):
-        strR=''
+        strDict={}
         iOffset = iStartIndex
         while iOffset <= iEndIndex:
             num2=self.byteToInt(arrLfvMsg, iOffset,2)
@@ -355,15 +362,12 @@ class API():
             iOffset = iOffset + 2;
             str1=arrLfvMsg[iOffset: iOffset + num2 - 2]
             iOffset = iOffset + num2 - 2
-            #strR=strR+'#'+str(idx)+'='+str1.decode('gbk')
-            strR = strR + '#' + FieldName[idx]
+            name=FieldName[idx]
             value=str1.decode('gbk')
-            #====================================
-            if FieldName[idx]=='sZipBuff':
+            if name=='sZipBuff':
                 value=self.unzipQuote(value)
-            #====================================
-            strR=strR+'='+value
-        return strR
+            strDict[name]=value
+        return strDict
 
     '''
     byte数据转int
@@ -378,10 +382,10 @@ class API():
     报价字符串解码
     '''
     def unzipQuote(self,sZipBuff):
-        strR='^'
+        strDict={}
         mNeedZipFields=['lastSettle', 'lastClose', 'open', 'high', 'low', 'last', 'close', 'settle', 'bid1', 'bidLot1', 'bid2', 'bidLot2', 'bid3', 'bidLot3', 'bid4', 'bidLot4',
-            'bid5', 'bidLot5', 'ask1', 'askLot1', 'ask2', 'askLot2', 'ask3', 'askLot3', 'ask4', 'askLot4', 'ask5', 'askLot5', 'volume', 'weight', 'highLimit', 'lowLimit',
-            'Posi', 'upDown', 'turnOver', 'average', 'sequenceNo', 'quoteTime', 'upDownRate']
+                        'bid5', 'bidLot5', 'ask1', 'askLot1', 'ask2', 'askLot2', 'ask3', 'askLot3', 'ask4', 'askLot4', 'ask5', 'askLot5', 'volume', 'weight', 'highLimit', 'lowLimit',
+                        'Posi', 'upDown', 'turnOver', 'average', 'sequenceNo', 'quoteTime', 'upDownRate']
         buffer=base64.b64decode(sZipBuff)
         i = 0;
         while i < len(buffer):
@@ -396,12 +400,7 @@ class API():
             bytes=buffer[i+1:i+num4+1]
             i=i+num4+1
             name=mNeedZipFields[index]
-            '''
-            value = 0
-            L = len(bytes)
-            for ii in range(L):
-                value=value+bytes[ii]<<(8*(L-ii-1))
-            '''
+
             value=self.toLongByBytes(bytes)/1000
             #value=value/1000
             if name=='quoteTime':
@@ -411,8 +410,8 @@ class API():
             if name=='upDownRate':
                 value=value/10000
 
-            strR=strR+name+'='+str(value)+'^'
-        return strR
+            strDict[name]=value
+        return strDict
 
     '''
     bytes转long

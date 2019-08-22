@@ -368,8 +368,10 @@ class CustomerInfo(RspBase):
 class QuoteItem(RspBase):
     def __init__(self):
         self.ApiName=''
+        self.RspMsg=''
         self.instID=''
         self.quoteDate=''
+        self.RspCode=''
         self.upDownRate = 0
         self.quoteTime = ''
         self.sequenceNo = 0
@@ -409,6 +411,19 @@ class QuoteItem(RspBase):
         self.open = 0
         self.lastClose = 0
         self.lastSettle = 0
+    def fromDict(self,qDict):
+        for k in qDict.keys():
+            v=qDict[k]
+            if k=='sZipBuff':
+                for kk in v.keys():
+                    vv=qDict[k][kk]
+                    if kk=='quoteTime':
+                        exec('self.'+kk+'=vv')
+                    else:
+                        exec('self.'+kk+'=float(vv)')
+            else:
+                exec('self.'+k+'=v')
+        return
 
 class Quote(object):
     def __init__(self):
@@ -416,7 +431,7 @@ class Quote(object):
         self.au100g = QuoteItem()
         self.iau9999 = QuoteItem()
         self.au50g = QuoteItem()
-        self.iau100 = QuoteItem()
+        self.iau100g = QuoteItem()
         self.au9995 = QuoteItem()
         self.autn2 = QuoteItem()
         self.agtd = QuoteItem()
@@ -429,4 +444,10 @@ class Quote(object):
         self.iau995 = QuoteItem()
         self.pt9995 = QuoteItem()
         self.mautd = QuoteItem()
+    def fromDict(self,qDict):
+        if 'instID' in qDict:
+            key=qDict['instID']
+            exec('self.'+re.sub('[.+()]','',key).lower()+'.fromDict(qDict)')
+        return
+
 
