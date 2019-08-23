@@ -106,7 +106,9 @@ class ReqP4001(ReqBase):
         self. prod_code = ""
         self.src_match_no = ""
 
-
+'''
+开多
+'''
 class ReqT4041(ReqP4001):
     def __init__(self):
         super(ReqT4041, self).__init__()
@@ -114,6 +116,42 @@ class ReqT4041(ReqP4001):
         self.bs = "b"
         self.deli_flag = ""
         self.offset_flag = "0"
+
+'''
+开空
+'''
+class ReqT4042(ReqP4001):
+    def __init__(self):
+        super(ReqT4042, self).__init__()
+        self.b_market_id = "02"
+        self.bs = "s"
+        self.deli_flag = ""
+        self.offset_flag = "0"
+
+'''
+平多
+'''
+class ReqT4043(ReqP4001):
+    def __init__(self):
+        super(ReqT4043, self).__init__()
+        self.b_market_id = "02"
+        self.bs = "s"
+        self.cov_type='1'
+        self.deli_flag = ""
+        self.offset_flag = "1"
+
+'''
+平空
+'''
+class ReqT4044(ReqP4001):
+    def __init__(self):
+        super(ReqT4044, self).__init__()
+        self.b_market_id = "02"
+        self.bs = "b"
+        self.cov_type='1'
+        self.deli_flag = ""
+        self.offset_flag = "1"
+
 
 '''
 获取客户信息的发送类

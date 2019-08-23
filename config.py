@@ -5,6 +5,10 @@ import socket
 »´æ÷≈‰÷√
 '''
 
+CodeList=['Au99.99','Au100g','iAu99.99','Au50g','iAu100g','Au99.95',\
+          'Au(T+N2)','Ag(T+D)','Au(T+N1)','Au(T+D)','Ag99.99','Au99.5',\
+          'Ag99.9','Pgc30g','iAu99.5','Pt99.95','mAu(T+D)']
+
 Constant={
     'bank_no':'0015',
     'login_ip':socket.gethostbyname(socket.gethostname(  )),
@@ -39,3 +43,4 @@ FieldName={
     951: 'quoteDate',
     1006 : 'sZipBuff',
 }
+

@@ -66,7 +66,7 @@ class API():
         logSevStr=streamArr.decode('gbk')
         self.serverInfo.fromString(logSevStr)
         if self.serverInfo.rsp_msg=='处理成功':
-            return True,self.serverInfo.rsp_msg
+            return True,"登陆成功"
         else:
             return  False,self.serverInfo.rsp_msg
 
@@ -140,34 +140,44 @@ class API():
     '''
     交易函数
     '''
-    def trade(self):
+    def trade(self,code,bs,price,amount):
+        '''
+         交易方向 4041(开多) 4042（开空） 4043（平多） 4044（平空）
+        '''
+        if code not in CodeList:
+            return False,"交易对象"+code+"不在列表中"
+        if bs=='ob':
+            exch_code='4041'
+            v_reqMag=Trans.ReqT4041()
+        elif bs=='os':
+            exch_code='4042'
+            v_reqMag=Trans.ReqT4042()
+        elif bs=='cb':
+            exch_code='4043'
+            v_reqMag=Trans.ReqT4043()
+        elif bs=='cs':
+            exch_code='4044'
+            v_reqMag=Trans.ReqT4044()
+        else:
+            return False,"交易方向错误，应为ob(开多),os(开空),cb(平多),cs(平空)中的一种"
+
+
         # 数据头
         GReqHead = Trans.ReqHead()
         GReqHead.branch_id=self.serverInfo.branch_id
-        GReqHead.exch_code='4041'
+        GReqHead.exch_code=exch_code
         GReqHead.msg_flag='1'
         GReqHead.msg_type='1'
         GReqHead.term_type='03'
         GReqHead.user_id=self.serverInfo.user_id
         GReqHead.user_type='2'
         # 数据体
-        v_reqMag = Trans.ReqT4041()
         v_reqMag.acct_no=self.serverInfo.user_id
-        v_reqMag.b_market_id = '02'
-        v_reqMag.bank_no = ''
-        v_reqMag.bs = 'b'               # 交易方向
         v_reqMag.client_serial_no = self.serverInfo.user_id+str((datetime.datetime.now().hour*3600+datetime.datetime.now().minute*60+datetime.datetime.now().second)*10) # '1021805322584010'
-        v_reqMag.cov_type = ''
         v_reqMag.cust_id = self.serverInfo.user_id
-        v_reqMag.deli_flag = ''
-        v_reqMag.entr_amount = '1'      # 交易数量
-        v_reqMag.entr_price = '3904.00' # 交易价格
-        v_reqMag.match_type = '1'
-        v_reqMag.offset_flag = '0'
-        v_reqMag.oper_flag = '1'
-        v_reqMag.order_send_type = '1'
-        v_reqMag.prod_code = 'Ag(T+D)' # 交易品种
-        v_reqMag.src_match_no = ''
+        v_reqMag.entr_amount = amount      # 交易数量
+        v_reqMag.entr_price = price # 交易价格
+        v_reqMag.prod_code = code # 交易品种
 
         v_sMsg = GReqHead.ToString() + v_reqMag.ToString()
         ip=self.serverInfo.trans_ip
@@ -175,8 +185,8 @@ class API():
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((ip, port))
         self.SendGoldMsg(client,v_sMsg)
-        trade_str=self.RecvGoldMsg(client)
-        print(trade_str)
+        trade_Dict=Comm.splitInfoStr(self.RecvGoldMsg(client))
+        print(trade_Dict)
         client.close()
 
 

@@ -3,6 +3,7 @@ import OpenSSL
 import rsa
 from dateutil import parser
 import pyDes
+import re
 '''
 字符串填充
 str：原字符串
@@ -17,6 +18,18 @@ def Fill(str,fillStr,maxLen,dir):
         return str.ljust(maxLen,fillStr)
     else:
         raise Exception("dir必须为 R 或 L")
+
+
+'''
+分离消息字符串
+infoStr:消息字符串 e.g. '74a3572140412032 1021805322    B00151853   HJ4109  #rsp_msg=可用资金不够#oper_no=False#'
+return: {'oper_no': 'False', 'rsp_msg': '可用资金不够'}
+'''
+def splitInfoStr(infoStr):
+    info=re.findall('(?<=#)(.*?)=(.*?)#', infoStr, re.M | re.I | re.S)
+    reDict={}
+    reDict.update(info)
+    return reDict
 
 
 '''
