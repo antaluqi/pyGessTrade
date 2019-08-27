@@ -205,7 +205,8 @@ class API():
         GReqHead.user_type='2'
         # 数据体
         v_reqMag=Trans.ReqT6002()
-        v_reqMag.alm_view_field="exch_date∧order_no∧market_id∧prod_code∧exch_code∧entr_price∧entr_amount∧remain_amount∧offset_flag∧entr_stat∧e_term_type∧e_exch_time∧c_term_type∧c_exch_time∧rsp_msg∧local_order_no∧"
+        v_reqMag.alm_view_field='∧'.join(list(vars(Trans.Alm_View_item()).keys()))
+        #v_reqMag.alm_view_field="exch_date∧order_no∧market_id∧prod_code∧exch_code∧entr_price∧entr_amount∧remain_amount∧offset_flag∧entr_stat∧e_term_type∧e_exch_time∧c_term_type∧c_exch_time∧rsp_msg∧local_order_no∧"
         v_reqMag.curr_page='1'
         v_reqMag.login_branch_id=self.serverInfo.branch_id
         v_reqMag.login_teller_id=self.serverInfo.user_id
@@ -214,7 +215,6 @@ class API():
         v_reqMag.query_id='AcctEntrFlow'
 
         v_sMsg = GReqHead.ToString() + v_reqMag.ToString()
-        print(v_sMsg)
         # 'cb8e8527160021032 1021805322    B00151853                       #alm_view_field=exch_date∧order_no∧market_id∧prod_code∧exch_code∧entr_price∧entr_amount∧remain_amount∧offset_flag∧entr_stat∧e_term_type∧e_exch_time∧c_term_type∧c_exch_time∧rsp_msg∧local_order_no∧#curr_page=1#login_branch_id=B00151853#login_teller_id=1021805322#oper_flag=1#paginal_num=500#query_id=AcctEntrFlow#prod_code=#exch_code=#b_offset_flag=#'
         ip=self.serverInfo.query_ip
         port=self.serverInfo.query_port
@@ -223,10 +223,16 @@ class API():
         client.connect((ip, port))
         self.SendGoldMsg(client,v_sMsg)
         tradeInfo_str=self.RecvGoldMsg(client)
-        print(tradeInfo_str)
         client.close()
+        alm_view=Trans.Alm_View()
+        alm_view.fromString(tradeInfo_str)
+        return alm_view.toDict()
 
 
+
+    '''
+    关闭
+    '''
     def Close(self):
         # 数据头
         GReqHead = Trans.ReqHead()

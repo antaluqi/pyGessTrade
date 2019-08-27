@@ -157,7 +157,6 @@ class ReqT4044(ReqP4001):
 获取客户信息的发送类
 '''
 class ReqT1020(ReqBase):
-
     def __init__(self):
         self.acct_no = ""
         self.is_check_stat = "1"
@@ -194,6 +193,101 @@ class ReqT6002(ReqBase):
         for k,v in fields.items():
                 strR=strR+k+'='+str(v)+'#'
         return strR
+
+'''
+获取交易信息的字段类(提供字段名称 及获取信息)
+'''
+class Alm_View_item(object):
+    def __init__(self):
+        self.exch_date=''      # 交易日期 20190827
+        self.order_no=''       # 报单号  02105393
+        self.market_id=''      # 市场编号 02
+        self.prod_code=''      # 合约代码 Ag(T+D)
+        self.exch_code=''      # 交易类型 4041
+        self.entr_price=0     # 委托价格 4280
+        self.entr_amount=0    # 委托数量 1
+        self.remain_amount=0  # 未成交数量 1
+        self.offset_flag=''    # ?     0
+        self.entr_stat=''      # 保单状态 o（已报入）
+        self.e_term_type=''    # ? 03
+        self.e_exch_time=''    # 委托时间 214158
+        self.c_term_type=''    # ? []
+        self.c_exch_time=''    # ?  []
+        self.rsp_msg=''        # 回复信息
+        self.local_order_no='' # 本地报单号 100993
+
+    def fromString(self,infoStr):
+        result=infoStr.split('｜')
+        self.exch_date=result[0]
+        self.order_no=result[1]
+        self.market_id=result[2]
+        self.prod_code=result[3]
+        self.exch_code=result[4]
+        self.entr_price=float(result[5])
+        self.entr_amount=int(result[6])
+        self.remain_amount=int(result[7])
+        self.offset_flag=result[8]
+        self.entr_stat=result[9]
+        self.e_term_type=result[10]
+        self.e_exch_time=result[11]
+        self.c_term_type=result[12]
+        self.c_exch_time=result[13]
+        self.rsp_msg=result[14]
+        self.local_order_no=result[15]
+
+    def toDict(self):
+        return vars(self)
+
+class Alm_View(object):
+    def __init__(self):
+        self.curr_page=0
+        self.oper_flag=0
+        self.page_count=0
+        self.paginal_num=0
+        self.rsp_msg=''
+
+        self.average_price=0
+        self.entr_amount=0
+        self.remain_amount=0
+        self.billList=[]
+
+    def fromString(self,infoStr):
+        reList=re.findall(r'(?<=#)(.*?)=(.*?)#', infoStr, re.M | re.I | re.S)
+        reDict={}
+        reDict.update(reList)
+        if reDict['oper_flag']=='0':
+            return False,reDict['rsp_msg']
+        self.rsp_msg=reDict['rsp_msg']
+        self.oper_flag=int(reDict['oper_flag'])
+        self.paginal_num=int(reDict['paginal_num'])
+        self.curr_page=int(reDict['curr_page'])
+        alm_result_str=reDict['alm_result']
+        alm_result_list=alm_result_str.split('∧')
+        totle_result=alm_result_list[-2].split('｜')
+        if totle_result[0]!='合计':
+            return False,"统计信息有误"+alm_result_list[-2]
+        self.average_price=0 if totle_result[5]=='' else float(totle_result[5])
+        self.entr_amount=0 if totle_result[6]=='' else int(totle_result[6])
+        self.remain_amount=0 if totle_result[7]=='' else int(totle_result[7])
+        self.billList=[]
+        if len(alm_result_list)==2:
+            return True,"Totle:0"
+        alm_result_item_list=alm_result_list[0:-2]
+        for item in alm_result_item_list:
+            alm_view_item=Alm_View_item()
+            alm_view_item.fromString(item)
+            self.billList.append(alm_view_item)
+
+    def toDict(self):
+        reDict=vars(self).copy()
+        if len(self.billList)==0:
+            return reDict
+        reDict['billList']=[]
+        for item in self.billList:
+            reDict['billList'].append(item.toDict())
+        return reDict
+
+
 
 '''
 获取报价的发送消息类
@@ -316,6 +410,7 @@ class ServerInfo(RspBase):
         for k,v in vars(self).items():
             reStr=reStr+str(k)+'='+str(v)+'\n'
         return reStr
+
 '''
 返回客户信息的储存类
 '''
@@ -403,6 +498,10 @@ class CustomerInfo(RspBase):
             self.f_used_offset_quota = float(CustInfoMap['f_used_offset_quota'] )
             self.f_offset_entr_margin = float(CustInfoMap['f_offset_entr_margin'] )
 
+
+'''
+返回行情信息单项类
+'''
 class QuoteItem(RspBase):
     def __init__(self):
         self.ApiName=''
@@ -449,6 +548,7 @@ class QuoteItem(RspBase):
         self.open = 0
         self.lastClose = 0
         self.lastSettle = 0
+
     def fromDict(self,qDict):
         for k in qDict.keys():
             v=qDict[k]
@@ -463,6 +563,10 @@ class QuoteItem(RspBase):
                 exec('self.'+k+'=v')
         return
 
+
+'''
+返回行情信息类
+'''
 class Quote(object):
     def __init__(self):
         self.au9999 = QuoteItem()
@@ -482,6 +586,7 @@ class Quote(object):
         self.iau995 = QuoteItem()
         self.pt9995 = QuoteItem()
         self.mautd = QuoteItem()
+
     def fromDict(self,qDict):
         if 'instID' in qDict:
             key=qDict['instID']
