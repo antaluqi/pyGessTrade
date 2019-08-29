@@ -153,6 +153,11 @@ class ReqT4044(ReqP4001):
         self.offset_flag = "1"
 
 
+class ReqT4061(ReqBase):
+    def __init__(self):
+        self.cancel_order_no=''
+        self.oper_flag=0
+
 '''
 获取客户信息的发送类
 '''
@@ -207,13 +212,13 @@ class Alm_View_item(object):
         self.entr_price=0     # 委托价格 4280
         self.entr_amount=0    # 委托数量 1
         self.remain_amount=0  # 未成交数量 1
-        self.offset_flag=''    # ?     0
-        self.entr_stat=''      # 保单状态 o（已报入）
+        self.offset_flag=''    # 平仓标志（对冲） （1：是 0：否）
+        self.entr_stat=''      # 交易状态 o（开）c(卖)
         self.e_term_type=''    # ? 03
         self.e_exch_time=''    # 委托时间 214158
         self.c_term_type=''    # ? []
-        self.c_exch_time=''    # ?  []
-        self.rsp_msg=''        # 回复信息
+        self.c_exch_time=''    # 成交时间  215742
+        self.rsp_msg=''        # 回复信息  处理成功
         self.local_order_no='' # 本地报单号 100993
 
     def fromString(self,infoStr):
@@ -330,6 +335,9 @@ class RspBase(object):
             reStr=reStr+str(k)+'='+str(v)+'\n'
         return reStr
 
+    def ToDict(self):
+        return vars(self).copy()
+
 '''
 服务器返回登陆信息的储存类
 '''
@@ -417,43 +425,44 @@ class ServerInfo(RspBase):
 class CustomerInfo(RspBase):
 
     def __init__(self):
-        self.rsp_msg=''
-        self.oper_flag=0
-        self.c_acct_no=''
-        self.c_cust_id=''
-        self.c_account_no=''
-        self.c_open_bank_name=''
-        self.c_cust_abbr=''
+        self.rsp_msg=''        # 处理结果
+        self.oper_flag=0       # 处理结果标记
+        self.c_acct_no=''      # 客户号
+        self.c_cust_id=''      # 客户号
+        self.c_account_no=''   # 银行账号
+        self.c_open_bank_name='' # 开户银行名称
+        self.c_cust_abbr=''      # 客户名字
         self.c_b_fare_model_id=''
         self.c_m_fare_model_id=''
         self.c_acct_type=0
         self.c_ocma_flag=0
         self.c_acct_stat=0
         self.c_cert_type=''
-        self.c_cert_num=''
+        self.c_cert_num=''       #客户身份证号码
         self.c_branch_id=''
         self.f_currency_id=1
-        self.f_curr_bal=.43
-        self.f_can_use_bal=.43
-        self.f_can_get_bal=0.43
+        self.f_curr_bal=0
+        self.f_can_use_bal=0     # 可用资金
+        self.f_can_get_bal=0     # 可提资金
         self.f_in_bal=0
         self.f_out_bal=0
         self.f_buy_bal=0
         self.f_sell_bal=0
-        self.f_exch_froz_bal=0
-        self.f_posi_margin=0
+        self.f_exch_froz_bal=0     # 交易冻结资金
+        self.f_posi_margin=0       # 持仓保证金
         self.f_base_margin=0
         self.f_take_margin=0
         self.f_stor_margin=0
         self.f_pt_reserve=0
         self.f_ag_margin=0
         self.f_forward_froz=0
-        self.f_exch_fare=0
-        self.r_surplus=0.00
+        self.f_exch_fare=0        # 手续费
+        self.r_surplus=0.00       # 浮动盈亏
         self.f_offset_quota=0
         self.f_avaliable_offset_quota=0
         self.f_used_offset_quota=0
         self.f_offset_entr_margin=0
+        self.htm_td_info=[]
 
     def fromString(self,CustStr):
         msgTuple = re.findall(r'(.*?)=(.*?)#', CustStr.split('#', 1)[1], re.M | re.I)
@@ -497,6 +506,88 @@ class CustomerInfo(RspBase):
             self.f_avaliable_offset_quota = float(CustInfoMap['f_avaliable_offset_quota'] )
             self.f_used_offset_quota = float(CustInfoMap['f_used_offset_quota'] )
             self.f_offset_entr_margin = float(CustInfoMap['f_offset_entr_margin'] )
+            if 'htm_td_info' not in CustInfoMap:
+                return
+            htm_td_info=CustInfoMap['htm_td_info']
+            self.htm_td_info=TDInfo.fromString(htm_td_info)
+
+    def ToDict(self):
+        result=vars(self).copy()
+        if result['htm_td_info']==[]:
+            return result
+        htm_td_info=[]
+        for item in result['htm_td_info']:
+            htm_td_info.append(item.ToDict())
+        result['htm_td_info']=htm_td_info
+        return result
+'''
+仓位情况类
+'''
+class TDInfo(RspBase):
+    def __init__(self):
+
+        self.td_day_cov_long_froz=0           # 当日平多仓冻结
+        self.td_day_cov_short_froz=0          # 当日平空仓冻结
+        self.td_short_open_avg_price =0.00    # 空头开仓均价
+        self.td_long_amt =0                   # 当前多仓
+        self.td_day_open_short =0             # 当日开空仓
+        self.td_day_deli_short=0               # 当日交割空仓
+        self.td_day_open_long =0              # 当日开多仓
+        self.td_day_deli_long_forz=0           # 当日交割多仓冻结
+        self.td_short_amt=0                   # 当前空仓
+        self.td_day_cov_short=0               # 当日平空仓
+        self.td_day_settle_price=0.00         # 当日结算价
+        self.td_last_settle_price=0.00        # 上日结算价
+        self.td_long_posi_avg_price=0.00      # 多头持仓均价
+        self.td_can_use_short=0               # 可用空仓
+        self.td_long_margin=0.00              # 多头持仓保证金
+        self.td_long_open_avg_price=0.00      # 多头开仓均价
+        self.td_prod_code=""                  # 合约代码
+        self.td_day_cov_long=0                 # 当日平多仓
+        self.td_short_margin=0.00             # 空头持仓保证金
+        self.td_day_deli_long=0              # 当日交割多仓
+        self.td_day_deli_short_forz=0        # 当日交割空仓冻结
+        self.td_short_posi_avg_price=0.00    # 空头持仓均价
+        self.td_can_use_long=0               # 可用多仓
+
+    @staticmethod
+    def fromString(infoStr):
+        # td_day_cov_long_froz｜td_day_cov_short_froz｜td_short_open_avg_price｜td_long_amt｜td_day_open_short｜td_day_deli_short｜td_day_open_long｜td_day_deli_long_forz｜td_short_amt｜td_day_cov_short｜td_day_settle_price｜td_last_settle_price｜td_long_posi_avg_price｜td_can_use_short｜td_long_margin｜td_long_open_avg_price｜td_prod_code｜td_day_cov_long｜td_short_margin｜td_day_deli_long｜td_day_deli_short_forz｜td_short_posi_avg_price｜td_can_use_long｜∧0ˇ0ˇ0ˇ1ˇ0ˇ0ˇ1ˇ0ˇ0ˇ0ˇ0ˇ358.19ˇ356.93ˇ0ˇ2855.44ˇ356.93ˇmAu(T+D)ˇ0ˇ0ˇ0ˇ0ˇ0ˇ1ˇ｜∧
+        result=[]
+        kv=infoStr.split('｜∧')
+        if len(kv)<3:
+            return result;
+        key=kv[0].split('｜')
+        for v in kv[1:-1]:
+            td=TDInfo()
+            r={}
+            value=v.split('ˇ')
+            r.update(zip(key,value))
+            td.td_day_cov_long_froz=int(r['td_day_cov_long_froz'])          # 当日平多仓冻结
+            td.td_day_cov_short_froz=int(r['td_day_cov_short_froz'])           # 当日平空仓冻结
+            td.td_short_open_avg_price =float(r['td_short_open_avg_price'])     # 空头开仓均价
+            td.td_long_amt =int(r['td_long_amt'])                    # 当前多仓
+            td.td_day_open_short =int(r['td_day_open_short'])              # 当日开空仓
+            td.td_day_deli_short=int(r['td_day_deli_short'])                # 当日交割空仓
+            td.td_day_open_long =int(r['td_day_open_long'])               # 当日开多仓
+            td.td_day_deli_long_forz=int(r['td_day_deli_long_forz'])            # 当日交割多仓冻结
+            td.td_short_amt=int(r['td_short_amt'])                    # 当前空仓
+            td.td_day_cov_short=int(r['td_day_cov_short'])                # 当日平空仓
+            td.td_day_settle_price=float(r['td_day_settle_price'])          # 当日结算价
+            td.td_last_settle_price=float(r['td_last_settle_price'])         # 上日结算价
+            td.td_long_posi_avg_price=float(r['td_long_posi_avg_price'])       # 多头持仓均价
+            td.td_can_use_short=int(r['td_can_use_short'])                # 可用空仓
+            td.td_long_margin=float(r['td_long_margin'])               # 多头持仓保证金
+            td.td_long_open_avg_price=float(r['td_long_open_avg_price'])       # 多头开仓均价
+            td.td_prod_code=r['td_prod_code']                 # 合约代码
+            td.td_day_cov_long=int(r['td_day_cov_long'])                  # 当日平多仓
+            td.td_short_margin=float(r['td_short_margin'])             # 空头持仓保证金
+            td.td_day_deli_long=int(r['td_day_deli_long'])               # 当日交割多仓
+            td.td_day_deli_short_forz=int(r['td_day_deli_short_forz'])         # 当日交割空仓冻结
+            td.td_short_posi_avg_price=float(r['td_short_posi_avg_price'])      # 空头持仓均价
+            td.td_can_use_long=int(r['td_can_use_long'])                # 可用多仓
+            result.append(td)
+        return result
 
 
 '''
@@ -562,6 +653,7 @@ class QuoteItem(RspBase):
             else:
                 exec('self.'+k+'=v')
         return
+
 
 
 '''

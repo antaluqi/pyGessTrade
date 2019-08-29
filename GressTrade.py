@@ -189,7 +189,32 @@ class API():
         print(trade_Dict)
         client.close()
 
-
+    '''
+    撤单函数
+    '''
+    def cancel(self,order_no):
+       # 数据头
+       GReqHead = Trans.ReqHead()
+       GReqHead.branch_id=self.serverInfo.branch_id
+       GReqHead.exch_code='4061'
+       GReqHead.msg_flag='1'
+       GReqHead.msg_type='1'
+       GReqHead.term_type='03'
+       GReqHead.user_id=self.serverInfo.user_id
+       GReqHead.user_type='2'
+       # 数据体
+       v_reqMag=Trans.ReqT4061()
+       v_reqMag.cancel_order_no=order_no
+       v_reqMag.oper_flag=1
+       v_sMsg = GReqHead.ToString() + v_reqMag.ToString()
+       ip=self.serverInfo.trans_ip
+       port=self.serverInfo.trans_port
+       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+       client.connect((ip, port))
+       self.SendGoldMsg(client,v_sMsg)
+       trade_Dict=Comm.splitInfoStr(self.RecvGoldMsg(client))
+       print(trade_Dict)
+       client.close()
     '''
     交易信息查询
     '''
