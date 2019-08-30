@@ -5,10 +5,12 @@ import socket
 全局配置
 '''
 
+'''商品代码列表'''
 CodeList=['Au99.99','Au100g','iAu99.99','Au50g','iAu100g','Au99.95',\
           'Au(T+N2)','Ag(T+D)','Au(T+N1)','Au(T+D)','Ag99.99','Au99.5',\
-          'Ag99.9','Pgc30g','iAu99.5','Pt99.95','mAu(T+D)']
+          'Ag99.9','PGC30g','iAu99.5','Pt99.95','mAu(T+D)']
 
+'''一些基础配置数据'''
 Constant={
     'bank_no':'0015',
     'login_ip':socket.gethostbyname(socket.gethostname(  )),
@@ -24,6 +26,8 @@ Constant={
 
 }
 
+
+'''字段代码对照表'''
 FieldName={
     31 :'ApiName',
     49 : 'RspCode',

@@ -31,7 +31,6 @@ def splitInfoStr(infoStr):
     reDict.update(info)
     return reDict
 
-
 '''
 MD5
 '''
