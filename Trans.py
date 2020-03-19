@@ -602,6 +602,8 @@ class Quote(object):
         self.iau995 = QuoteItem()
         self.pt9995 = QuoteItem()
         self.mautd = QuoteItem()
+        self.nyautn12=QuoteItem()
+        self.nyautn06=QuoteItem()
 
     def fromDict(self, qDict):
         if 'instID' in qDict:
