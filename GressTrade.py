@@ -130,10 +130,42 @@ class API():
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((ip, port))
         self.__SendGoldMsg(client, v_sMsg)
-        for i in range(44):
+        for i in range(48):
             QuoteInfo_Dict = self.__RecvGoldMsg(client)
             self.quote.fromDict(QuoteInfo_Dict)
         client.close()
+
+    def getQuote2(self):
+        # 数据体
+        v_reqMag = Trans.GBcMsgReqLink()
+        v_reqMag.RspCode = ''
+        v_reqMag.RspMsg = ''
+        v_reqMag.again_flag = '0'
+        v_reqMag.branch_id = self.serverInfo.branch_id
+        v_reqMag.cust_type_id = 'C01'
+        v_reqMag.is_lfv = '1'
+        v_reqMag.lan_ip = Constant['login_ip']
+        v_reqMag.term_type = ''
+        v_reqMag.user_id = self.user_id
+        v_reqMag.user_key = datetime.datetime.now().strftime('%H%M%S%f')[0:-3]
+        v_reqMag.user_pwd = self.__user_pwd
+        v_reqMag.user_type = Constant['user_type']
+        v_reqMag.www_ip = ''
+
+        v_sMsg = v_reqMag.toString()
+        ip = self.serverInfo.broadcast_ip
+        port = self.serverInfo.broadcast_port
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((ip, port))
+        self.__SendGoldMsg(client, v_sMsg)
+        for i in range(50):
+            print(i)
+            QuoteInfo_Dict = self.__RecvGoldMsg(client)
+            pprint.pprint(QuoteInfo_Dict)
+            self.quote.fromDict(QuoteInfo_Dict)
+            print('--------------------------------------------')
+        client.close()
+
 
     '''交易函数 '''
 
@@ -307,7 +339,7 @@ class API():
 
     '''按长度接受数据'''
 
-    def __RecvByLen(obj, client, v_iRecvLen):
+    def __RecvByLen(self, client, v_iRecvLen):
         num = 0
         buffer = ''.encode('utf-8');
         while num < v_iRecvLen:
@@ -388,6 +420,7 @@ class API():
             iOffset = iOffset + 2;
             str1 = arrLfvMsg[iOffset: iOffset + num2 - 2]
             iOffset = iOffset + num2 - 2
+            #print(idx)
             name = FieldName[idx]
             value = str1.decode('gbk')
             if name == 'sZipBuff':
@@ -446,7 +479,7 @@ class API():
         for i in range(len(bytes)):
             str2 = format(bytes[i], '#010b')[2:]
             if len(str2) > 8:
-                str2 = str2[end - 8:]
+                str2 = str2[-8:] #可能有错
             strR = strR + str2
         if strR[0] == '1':
             return int('0b0' + strR[1:], 2) * (-1)
