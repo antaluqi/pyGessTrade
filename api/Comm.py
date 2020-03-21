@@ -4,6 +4,7 @@ import rsa
 from dateutil import parser
 import pyDes
 import re
+import datetime
 '''
 字符串填充
 str：原字符串
@@ -90,3 +91,32 @@ def triple_des_encrypt(key,iv,value):
 def triple_des_decrypt(key,iv,value):
     k = pyDes.triple_des(key, pyDes.CBC, IV=iv, pad=None, padmode=pyDes.PAD_PKCS5)
     return k.decrypt(value)
+
+'''
+是否交易时间段
+'''
+
+def isTradeTime():
+    t=datetime.datetime.now()
+    #t=datetime.datetime(2020,3,20,14,30,34,0)
+    t11=datetime.time(0,0,0)
+    t12=datetime.time(2,30,0)
+    t21=datetime.time(9,0,0)
+    t22=datetime.time(15,30,0)
+    t31=datetime.time(20,0,0)
+    t32=datetime.time(23,59,0)
+
+    out=1
+    # 所有日子的非交易时间段
+    if (t.time()>=t12 and t.time()<t21) or (t.time()>=t22 and t.time()<t31):
+        out=-1
+    # 周日全天
+    if t.weekday()==6:
+        out=-2
+    # 周一九点前
+    if t.weekday()==0 and t.time()<t21:
+        out=-3
+    # 周六2点后
+    if t.weekday()==5 and t.time()>=t12:
+        out=-4
+    return out

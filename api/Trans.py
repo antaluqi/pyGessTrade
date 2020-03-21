@@ -1,5 +1,5 @@
-import Comm
-from config import *
+import api.Comm as Comm
+from api.config import *
 import datetime
 import re
 

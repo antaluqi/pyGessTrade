@@ -1,8 +1,9 @@
-import Trans, Comm
-from config import *
+import api.Trans as Trans 
+import api.Comm as Comm
+from api.config import *
 import socket, re, gzip
 import pprint
-import datetime
+import datetime,time
 import base64
 
 
@@ -15,6 +16,9 @@ class API():
         self.user_id = ''
         self.__user_pwd = ''
         self.quote = Trans.Quote()
+        socket.setdefaulttimeout(2)
+        self.quoteClient=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
 
     '''登陆'''
 
@@ -44,7 +48,7 @@ class API():
 
         self.user_id = v_reqMag.user_id
         self.__user_pwd = v_reqMag.user_pwd
-        publicKey = Comm.getCrtFilePublickey("./cert/server.crt")
+        publicKey = Comm.getCrtFilePublickey("./api/cert/server.crt")
         buffer = ''.encode('utf-8')
         for i in range(0, len(v_sMsg), 100):
             buffer = buffer + Comm.rsaEncrypt(v_sMsg[i:i + 100].encode('utf-8'), publicKey)
@@ -58,7 +62,7 @@ class API():
         buffer4 = client.recv(8)
         buffer5 = client.recv(int(buffer4.decode('utf-8')))
         client.close()
-        privateKey = Comm.getPfxFilePrivatekey("./cert/client.pfx", '123456')
+        privateKey = Comm.getPfxFilePrivatekey("./api/cert/client.pfx", '123456')
         streamArr = ''.encode('utf-8')
         for i in range(0, len(buffer5), 128):
             buffer6 = buffer5[i:i + 128]
@@ -130,12 +134,38 @@ class API():
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((ip, port))
         self.__SendGoldMsg(client, v_sMsg)
-        for i in range(48):
+        for i in range(52):
             QuoteInfo_Dict = self.__RecvGoldMsg(client)
             self.quote.fromDict(QuoteInfo_Dict)
         client.close()
 
     def getQuote2(self):
+      # 非交易时间段只进行一次价格查询
+      if  Comm.isTradeTime!=1:
+          self.getQuote_start()
+          self.quoteClient.shutdown((socket.SHUT_RDWR))
+          return
+      # 交易时间段内最多重新连接5次
+      i=0
+      while i<5:
+            try:
+                self.getQuote_step()
+                return
+            except socket.timeout:
+                print('超时,重新建立连接...(%d)'%(i+1))
+                self.getQuote_start()
+                i+=1
+            except socket.os.error:
+                print('socket无效,重新建立连接...(%d)'%(i+1))
+                i+=1
+                self.getQuote_start()
+      self.quoteClient.shutdown((socket.SHUT_RDWR))
+      print('行情服务器关闭！')
+
+
+    '''获取报价（建立连接并接受首批数据）'''
+
+    def getQuote_start(self):
         # 数据体
         v_reqMag = Trans.GBcMsgReqLink()
         v_reqMag.RspCode = ''
@@ -155,17 +185,29 @@ class API():
         v_sMsg = v_reqMag.toString()
         ip = self.serverInfo.broadcast_ip
         port = self.serverInfo.broadcast_port
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+           self.quoteClient.shutdown((socket.SHUT_RDWR))
+        except:
+           pass
+        self.quoteClient=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client=self.quoteClient
+        
         client.connect((ip, port))
         self.__SendGoldMsg(client, v_sMsg)
-        for i in range(50):
-            print(i)
-            QuoteInfo_Dict = self.__RecvGoldMsg(client)
-            pprint.pprint(QuoteInfo_Dict)
-            self.quote.fromDict(QuoteInfo_Dict)
-            print('--------------------------------------------')
-        client.close()
+        for i in range(52):
+            #print(i)
+            self.getQuote_step()
+        #client.close()
 
+    '''单步获取行情，用于价格轮询'''
+    def getQuote_step(self):
+        client=self.quoteClient
+        QuoteInfo_Dict = self.__RecvGoldMsg(client)
+        self.quote.fromDict(QuoteInfo_Dict)
+
+        #pprint.pprint(QuoteInfo_Dict)
+        #print('--------------------------------------------')      
 
     '''交易函数 '''
 
@@ -284,6 +326,7 @@ class API():
     '''关闭'''
 
     def Close(self):
+        self.quoteClient.shutdown(socket.SHUT_RDWR)# 关闭行情接受客户端
         # 数据头
         GReqHead = Trans.ReqHead()
         GReqHead.branch_id = self.serverInfo.branch_id
