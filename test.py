@@ -1,4 +1,3 @@
-
 import api.GressTrade as gt
 from multiprocessing import Process,Queue
 import multiprocessing
@@ -8,17 +7,18 @@ import time
 
 
 
-def recvQuote(api,q):
-    for i in range(20):
-        #q.put(api.quote.mautd.last)
-        q.put(i)
+def recvQuote(q,api):
+    for i in range(2000):
+        api.getQuote2()
+        q.put(api.quote.mautd.last)
+        #q.put(i)
         print('进程1执行%d'%(i))
         #print(q.qsize())
 
-def printQuote(api,q):
-    for i in range(20):
+def printQuote(q,api):
+    for i in range(2000):
         price=q.get()
-        print('进程2执行--%d'%(price))
+        print('进程2执行--%f'%(price))
         
 
 if __name__=='__main__':
@@ -27,8 +27,8 @@ if __name__=='__main__':
     print(logMasg)
 
     q=Queue(1)
-    p1 = Process(target=recvQuote, args=(api,q))
-    p2 = Process(target=printQuote, args=(api,q))
+    p1 = Process(target=recvQuote, args=(q,api,))
+    p2 = Process(target=printQuote, args=(q,api,))
     p2.daemon=True
     p1.start()
     p2.start()

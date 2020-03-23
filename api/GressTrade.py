@@ -141,15 +141,17 @@ class API():
 
     def getQuote2(self):
       # 非交易时间段只进行一次价格查询
-      if  Comm.isTradeTime!=1:
+      if  Comm.isTradeTime()!=1:
           self.getQuote_start()
           self.quoteClient.shutdown((socket.SHUT_RDWR))
+          print('非交易时间段只进行一次价格查询')
           return
       # 交易时间段内最多重新连接5次
       i=0
       while i<5:
             try:
                 self.getQuote_step()
+                print('价格轮询成功')
                 return
             except socket.timeout:
                 print('超时,重新建立连接...(%d)'%(i+1))
@@ -201,6 +203,7 @@ class API():
         #client.close()
 
     '''单步获取行情，用于价格轮询'''
+
     def getQuote_step(self):
         client=self.quoteClient
         QuoteInfo_Dict = self.__RecvGoldMsg(client)
@@ -326,7 +329,10 @@ class API():
     '''关闭'''
 
     def Close(self):
-        self.quoteClient.shutdown(socket.SHUT_RDWR)# 关闭行情接受客户端
+        try:
+          self.quoteClient.shutdown(socket.SHUT_RDWR)# 关闭行情接受客户端
+        except Exception:
+            pass
         # 数据头
         GReqHead = Trans.ReqHead()
         GReqHead.branch_id = self.serverInfo.branch_id
