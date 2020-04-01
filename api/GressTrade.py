@@ -197,8 +197,7 @@ class API():
         
         client.connect((ip, port))
         self.__SendGoldMsg(client, v_sMsg)
-        for i in range(52):
-            #print(i)
+        for i in range(48): #?????????????到超时结束，行情表弟有时会有改变，怎么确定？
             self.getQuote_step()
         #client.close()
 
@@ -358,8 +357,11 @@ class API():
         client.close()
         closeR = re.findall(r'rsp_msg=(.*?)#', close_str, re.M | re.I)[0]
         if closeR == '处理成功':
+            print('关闭成功')
             return (True, closeR)
+        print('关闭失败')
         return (False, closeR)
+
 
         # fb9e673180022032 1021805322    B00151853   00000000#rsp_msg=处理成功#oper_flag=1#
 
