@@ -261,6 +261,7 @@ class API():
         trade_Dict = Comm.splitInfoStr(self.__RecvGoldMsg(client))
         print(trade_Dict)
         client.close()
+        
 
     '''撤单函数 '''
 
